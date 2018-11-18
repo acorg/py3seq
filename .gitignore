@@ -1,0 +1,7 @@
+dist
+py3seq.egg-info
+*.pyc
+*~
+__pycache__
+_trial_temp
+.pytest_cache
