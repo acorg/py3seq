@@ -1,13 +1,9 @@
-.PHONY: check, tcheck, clean, flake8, wc, upload
+.PHONY: check, clean, flake8, wc, upload
 
 XARGS := xargs $(shell test $$(uname) = Linux && echo -r)
 
 check:
-	pytest
-
-# You'll need to run 'pip install twisted' to use the following.
-tcheck:
-	env PYTHONPATH=. trial --rterrors test
+	pytest -v
 
 clean:
 	rm -fr _trial_temp .pytest_cache dist py3seq.egg-info

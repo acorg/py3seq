@@ -1,3 +1,12 @@
+## 1.1.0 2018-11-18
+
+Use the `3seq` option `-ptable` when running with `-full` to set the
+p-value table that should be used. So passing a p-value table file to
+`RecombinationAnalysis` (now mandatory) now works correctly. *Note* though
+that this will result in the file name being recorded in your `3seq` config
+file, replacing whatever value you may have had there previously while
+doing other interactive work with `3seq`.
+
 ## 1.0.3 2018-11-18
 
 TravisCI tweaks. Changed default location of p-value lookup table
