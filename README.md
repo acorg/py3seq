@@ -1,5 +1,10 @@
 ## py3seq - a Python wrapper for 3seq recombination detection
 
+
+Runs under Python 2.7, 3.5, 3.6, and 3.7. [Change log](CHANGELOG.md)
+[![Build Status](https://travis-ci.org/acorg/py3seq.svg?branch=master)](https://travis-ci.org/acorg/py3seq)
+
+
 Here's a Python class that can be used to call the `3seq` recombination
 detection algorithm described in
 [An exact nonparametric method for inferring mosaic structure in sequence triplets](http://www.genetics.org/content/176/2/1035)
