@@ -7,7 +7,7 @@ python:
 install:
   - pip install dark-matter
 script:
-  - pytest
+#  - pytest
   - find py3seq test -name '*.py' -print0 | xargs -0 flake8 --ignore E402,W504
 notifications:
   irc: "irc.freenode.net#acorg"

@@ -1,6 +1,6 @@
 # xfrom __future__ import print_function
 
-from os.path import join
+from os.path import join, dirname
 from tempfile import mkdtemp
 import shutil
 import six
@@ -9,7 +9,11 @@ from dark.process import Executor
 
 import py3seq
 
-_DEFAULT_PVALUE_FILE = join(py3seq.__file__, 'data', 'PVT.3SEQ.2017.700')
+# The default p-value lookup file is PVT.3SEQ.2017.700 (see ../README.md
+# for where to get this), located at the top level of the py3seq source.
+# This is only needed for development, but should be changed.
+_DEFAULT_PVALUE_FILE = join(dirname(dirname(py3seq.__file__)),
+                            'PVT.3SEQ.2017.700')
 _OUTPUT_PREFIX = 'output'
 
 _RECOMBINANTS_HEADER = '\t'.join(

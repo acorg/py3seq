@@ -54,12 +54,20 @@ $ pip install py3seq
 
 ## Using py3seq
 
+Make sure `3seq` knows about your p-value lookup table file (see above):
+
+```sh
+$ 3seq -c PVT.3SEQ.2017.700
+```
+
+Then:
+
 ```python
 from __future__ import print_function
 
 from py3seq import RecombinationAnalysis, readRecombinants
 
-analysis = RecombinationAnalysis()
+analysis = RecombinationAnalysis('PVT.3SEQ.2017.700')
 
 # Run the recombination on a FASTA file (Phylip is also supported, or you
 # can pass a Reads instance from the dark-matter package).
@@ -83,9 +91,9 @@ print('\n'.join(analysis.executor.log))
 ```
 
 Although you can pass a p-value table file (made with `3seq -g`) to
-`RecombinationAnalysis`, the file will not be used. This will be fixed in
-an upcoming release. The p-value table that is used is the one mentioned in
-the config file `3seq` maintains (see Step 4 in Section 3 of
+`RecombinationAnalysis` as above, the file will not be used. This will be
+fixed in an upcoming release. The p-value table that is used is the one
+mentioned in the config file `3seq` maintains (see Step 4 in Section 3 of
 [the 3seq manual](http://mol.ax/content/media/2018/02/3seq_manual.20180209.pdf)
 for the file location, depending on your OS).
 
