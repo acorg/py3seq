@@ -5,7 +5,7 @@ python:
   - "3.6"
   - "3.7-dev"
 install:
-  - pip install dark-matter
+  - pip install dark-matter flake8
 script:
 #  - pytest
   - find py3seq test -name '*.py' -print0 | xargs -0 flake8 --ignore E402,W504
