@@ -2,6 +2,8 @@ from unittest import TestCase
 from six import assertRaisesRegex
 from six.moves import builtins
 from os.path import join
+from tempfile import mkdtemp
+import shutil
 
 try:
     from unittest.mock import patch
@@ -10,6 +12,7 @@ except ImportError:
 
 from .mocking import mockOpen
 
+from dark.process import Executor
 from dark.reads import Read, Reads
 
 from py3seq import RecombinationAnalysis, readRecombinants
@@ -20,9 +23,27 @@ class TestAnalysis(TestCase):
     """
     Tests for the C{py3seq.RecombinationAnalysis} class.
     """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Make a tiny p-value table in a temporary directory.
+        """
+        e = Executor()
+        tmpDir = mkdtemp()
+        tableFile = join(tmpDir, 'table')
+        e.execute('3seq -g %s 2' % tableFile)
+        cls._tableFile = tableFile
+        cls._tmpDir = tmpDir
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Remove the p-value table temporary directory.
+        """
+        shutil.rmtree(cls._tmpDir)
 
     def setUp(self):
-        self.ra = RecombinationAnalysis()
+        self.ra = RecombinationAnalysis(TestAnalysis._tableFile)
 
     def tearDown(self):
         if self.ra.tmpDir:

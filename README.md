@@ -40,12 +40,6 @@ generate one yourself (see steps 3a, 3b, and 4 in
 else download and uncompress `PVT.3SEQ.2017.700` from
 [http://mol.ax/3seq](http://mol.ax/3seq).
 
-When you have a p-value lookup file, run `3seq -c FILENAME` to have `3seq`
-check that the file loads properly for you.  Note that *you must do this*
-(or similar) so that future runs of `3seq` will know what file to
-open. Hopefully that will soon be changed (see the discussion of passing a
-p-value table file to the `RecombinationAnalysis` class below).
-
 ## Installing py3seq
 
 ```sh
@@ -54,19 +48,12 @@ $ pip install py3seq
 
 ## Using py3seq
 
-Make sure `3seq` knows about your p-value lookup table file (see above):
-
-```sh
-$ 3seq -c PVT.3SEQ.2017.700
-```
-
-Then:
-
 ```python
 from __future__ import print_function
 
 from py3seq import RecombinationAnalysis, readRecombinants
 
+# The p-value lookup table file PVT.3SEQ.2017.700 is available as described above.
 analysis = RecombinationAnalysis('PVT.3SEQ.2017.700')
 
 # Run the recombination on a FASTA file (Phylip is also supported, or you
@@ -89,13 +76,6 @@ analysis.removeOutput()
 # took, etc.
 print('\n'.join(analysis.executor.log))
 ```
-
-Although you can pass a p-value table file (made with `3seq -g`) to
-`RecombinationAnalysis` as above, the file will not be used. This will be
-fixed in an upcoming release. The p-value table that is used is the one
-mentioned in the config file `3seq` maintains (see Step 4 in Section 3 of
-[the 3seq manual](http://mol.ax/content/media/2018/02/3seq_manual.20180209.pdf)
-for the file location, depending on your OS).
 
 ## Development
 
