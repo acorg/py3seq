@@ -66,7 +66,7 @@ analysis.run('filename.fasta')
 # Process all predicted recombinants.
 for recombinant in readRecombinants(analysis.recombinantFile()):
     print('%s is predicted to be a recombinant of %s and %s' %
-          (recombinant.recombinantId, recombinant.pId, recombinant.qid))
+          (recombinant.recombinantId, recombinant.pId, recombinant.qId))
     # See py3seq for all attributes of the Recombinant class.
 
 # Remove 3seq output files.

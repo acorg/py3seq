@@ -1,3 +1,7 @@
+## 1.1.1 2018-11-18
+
+Fixed variable name typo in `README.md` example Python.
+
 ## 1.1.0 2018-11-18
 
 Use the `3seq` option `-ptable` when running with `-full` to set the
