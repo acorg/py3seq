@@ -1,3 +1,7 @@
+## 1.1.2 2018-11-23
+
+Added note about license on underlying `3seq` code to README.
+
 ## 1.1.1 2018-11-18
 
 Fixed variable name typo in `README.md` example Python.

@@ -1,9 +1,7 @@
 ## py3seq - a Python wrapper for 3seq recombination detection
 
-
 Runs under Python 2.7, 3.5, 3.6, and 3.7. [Change log](CHANGELOG.md)
 [![Build Status](https://travis-ci.org/acorg/py3seq.svg?branch=master)](https://travis-ci.org/acorg/py3seq)
-
 
 Here's a Python class that can be used to call the `3seq` recombination
 detection algorithm described in
@@ -25,12 +23,21 @@ Pages 247–251, doi `10.1093/molbev/msx263`.
 
 ## 3seq pre-requisite
 
+`py3seq` relies on you first installing the `3seq` program (whose output
+`py3seq` reads).
+
 The source code for `3seq` can be obtained from
 [http://mol.ax/software/3seq](http://mol.ax/software/3seq/). The manual
 [is here](http://mol.ax/content/media/2018/02/3seq_manual.20180209.pdf).
 
 You will need to compile the software and then move the resulting `3seq`
 exectuable into a directory that's in your shell's `PATH` variable.
+
+*Note* that although the `py3seq` code uses [the MIT license](LICENSE),
+because you will need to run `3seq` to produce input for `py3seq`, you are
+still bound by the license on the underlying `3seq` C++ code. The `3seq`
+source code has the following notice near the top of `source/AppInfo.cpp`:
+"Licensed for non-commercial use only".
 
 ### p-value lookup table
 
