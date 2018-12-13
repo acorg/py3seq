@@ -58,12 +58,28 @@ class TestAnalysis(TestCase):
         self.assertEqual(0, result.returncode)
 
     def testRun(self):
+        """
+        Test that the run function returns an exit status of 0.
+        """
         reads = Reads([
             Read('id1', 'A' * 200 + 'G' * 200),
             Read('id2', 'A' * 400),
             Read('id3', 'G' * 400),
         ])
         result = self.ra.run(reads)
+        self.assertEqual(0, result.returncode)
+
+    def testRunThreshold(self):
+        """
+        Test that the run function returns an exit status of 0, if run with a
+        different threshold argument.
+        """
+        reads = Reads([
+            Read('id1', 'A' * 200 + 'G' * 200),
+            Read('id2', 'A' * 400),
+            Read('id3', 'G' * 400),
+        ])
+        result = self.ra.run(reads, t=0.0)
         self.assertEqual(0, result.returncode)
 
     def testRecombinantFileWithNoRun(self):

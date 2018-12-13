@@ -38,12 +38,14 @@ class RecombinationAnalysis(object):
         """
         return self.executor.execute('3seq -check "%s"' % self.pValueFile)
 
-    def run(self, reads):
+    def run(self, reads, t=0.05):
         """
         Run 3seq on some reads. Set self.tmpDir as a side-effect.
 
         @param reads: Either a C{dark.reads.Reads} instance or a C{str}
             filename.
+        @param t: A C{float} rejection treshold, e.g. 0.01, 1e-6; default
+            is 0.05.
         @return: A C{subprocess.CompletedProcess} instance.
         """
         self.tmpDir = mkdtemp()
@@ -55,8 +57,9 @@ class RecombinationAnalysis(object):
             reads.save(inputFile, format_='fasta')
 
         return self.executor.execute(
-            'echo y | 3seq -full "%s" -ptable "%s" -id "%s"' %
-            (inputFile, self.pValueFile, join(self.tmpDir, _OUTPUT_PREFIX)))
+            'echo y | 3seq -full "%s" -ptable "%s" -id "%s" -t%f' %
+            (inputFile, self.pValueFile, join(self.tmpDir, _OUTPUT_PREFIX),
+             t))
 
     def recombinantFile(self):
         """
