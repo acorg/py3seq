@@ -44,8 +44,7 @@ class RecombinationAnalysis(object):
 
         @param reads: Either a C{dark.reads.Reads} instance or a C{str}
             filename.
-        @param t: A C{float} rejection threshold, e.g. 0.01, 1e-6; default
-            is 0.05.
+        @param t: A C{float} rejection threshold, e.g. 0.01, 1e-6.
         @return: A C{subprocess.CompletedProcess} instance.
         """
         self.tmpDir = mkdtemp()
