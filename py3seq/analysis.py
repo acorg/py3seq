@@ -38,7 +38,7 @@ class RecombinationAnalysis(object):
         """
         return self.executor.execute('3seq -check "%s"' % self.pValueFile)
 
-    def run(self, reads, t=0.05):
+    def run(self, reads, t=None):
         """
         Run 3seq on some reads. Set self.tmpDir as a side-effect.
 
@@ -55,6 +55,8 @@ class RecombinationAnalysis(object):
         else:
             inputFile = join(self.tmpDir, 'input.fasta')
             reads.save(inputFile, format_='fasta')
+
+        t = t or 0.05
 
         return self.executor.execute(
             'echo y | 3seq -full "%s" -ptable "%s" -id "%s" -t%f' %
