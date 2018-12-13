@@ -1,3 +1,7 @@
+## 1.1.3 2018-12-13
+
+Added a -t argument to `RecombinationAnalysis.run()`.
+
 ## 1.1.2 2018-11-23
 
 Added note about license on underlying `3seq` code to README.
