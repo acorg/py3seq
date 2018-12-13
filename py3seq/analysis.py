@@ -162,7 +162,7 @@ def readRecombinants(filename):
 
             # Explicitly convert to the types we need one by one. This will
             # cause a more easily locatable error than if we do them all at
-            # once when createing the Recombinant instance below. The dict
+            # once when creating the Recombinant instance below. The dict
             # in the hs conversion is to force a KeyError if hs is not '0'
             # or '1'.
             m = int(m)
