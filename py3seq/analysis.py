@@ -40,11 +40,13 @@ class RecombinationAnalysis(object):
 
     def run(self, reads, t=0.05):
         """
-        Run 3seq on some reads. Set self.tmpDir as a side-effect.
+        Run 3seq on some reads. Sets self.tmpDir as a side-effect.
 
         @param reads: Either a C{dark.reads.Reads} instance or a C{str}
             filename.
-        @param t: A C{float} rejection threshold, e.g. 0.01, 1e-6.
+        @param t: A C{str} or C{float} error threshold, e.g. 0.01, '1e-6'
+            that will be passed on the command line to 3seq. See section
+            7.10 of the 3seq manual for details.
         @return: A C{subprocess.CompletedProcess} instance.
         """
         self.tmpDir = mkdtemp()
@@ -55,10 +57,14 @@ class RecombinationAnalysis(object):
             inputFile = join(self.tmpDir, 'input.fasta')
             reads.save(inputFile, format_='fasta')
 
+        # Note that the 3seq manual (as of 2018-12-29) says you can use
+        # '-fullrun' but that doesn't work. The source code looks for
+        # either -f or -full.  But -f seems ambiguous in the manual (it
+        # also means 'first') so I'm going with -full.
         return self.executor.execute(
-            'echo y | 3seq -full "%s" -ptable "%s" -id "%s" -t%f' %
+            'echo y | 3seq -full "%s" -ptable "%s" -id "%s" -t%s' %
             (inputFile, self.pValueFile, join(self.tmpDir, _OUTPUT_PREFIX),
-             t))
+             str(t)))
 
     def recombinantFile(self):
         """

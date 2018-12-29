@@ -1,3 +1,7 @@
+## 1.1.4 2018-12-29
+
+Allow passing a string value for `t` to the `run` method.
+
 ## 1.1.3 2018-12-13
 
 Added a -t argument to `RecombinationAnalysis.run()`.

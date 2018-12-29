@@ -69,10 +69,10 @@ class TestAnalysis(TestCase):
         result = self.ra.run(reads)
         self.assertEqual(0, result.returncode)
 
-    def testRunThreshold(self):
+    def testRunThresholdFloat(self):
         """
         Test that the run function returns an exit status of 0, if run with a
-        different threshold argument.
+        non-default (float) threshold argument.
         """
         reads = Reads([
             Read('id1', 'A' * 200 + 'G' * 200),
@@ -80,6 +80,19 @@ class TestAnalysis(TestCase):
             Read('id3', 'G' * 400),
         ])
         result = self.ra.run(reads, t=0.0)
+        self.assertEqual(0, result.returncode)
+
+    def testRunThresholdString(self):
+        """
+        Test that the run function returns an exit status of 0, if run with a
+        non-default (str) threshold argument.
+        """
+        reads = Reads([
+            Read('id1', 'A' * 200 + 'G' * 200),
+            Read('id2', 'A' * 400),
+            Read('id3', 'G' * 400),
+        ])
+        result = self.ra.run(reads, t='0.0')
         self.assertEqual(0, result.returncode)
 
     def testRecombinantFileWithNoRun(self):
