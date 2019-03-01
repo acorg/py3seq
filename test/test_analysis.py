@@ -15,13 +15,37 @@ from .mocking import mockOpen
 from dark.process import Executor
 from dark.reads import Read, Reads
 
-from py3seq import RecombinationAnalysis, readRecombinants
+from py3seq import (
+    RecombinationAnalysis, readRecombinants, informativeSites, triplet)
 from py3seq.analysis import _OUTPUT_PREFIX, _RECOMBINANTS_HEADER
 
 
 class TestAnalysis(TestCase):
     """
     Tests for the C{py3seq.RecombinationAnalysis} class.
+    """
+    def testRecombinantFileWithNoRun(self):
+        """
+        Test that the recombinantFile method raises a RuntimeError if it
+        is called before any analysis is done.
+        """
+        ra = RecombinationAnalysis(None)
+        error = '^No analysis has been run yet$'
+        assertRaisesRegex(self, RuntimeError, error, ra.recombinantFile)
+
+    def testRemoveOutputWithNoRun(self):
+        """
+        Test that the removeOutput method raises a RuntimeError if it
+        is called before any analysis is done.
+        """
+        ra = RecombinationAnalysis(None)
+        error = '^No analysis has been run yet$'
+        assertRaisesRegex(self, RuntimeError, error, ra.removeOutput)
+
+
+class TestRun(TestCase):
+    """
+    Tests for the C{py3seq.RecombinationAnalysis.run} method.
     """
     @classmethod
     def setUpClass(cls):
@@ -43,7 +67,7 @@ class TestAnalysis(TestCase):
         shutil.rmtree(cls._tmpDir)
 
     def setUp(self):
-        self.ra = RecombinationAnalysis(TestAnalysis._tableFile)
+        self.ra = RecombinationAnalysis(TestRun._tableFile)
 
     def tearDown(self):
         if self.ra.tmpDir:
@@ -95,14 +119,6 @@ class TestAnalysis(TestCase):
         result = self.ra.run(reads, t='0.0')
         self.assertEqual(0, result.returncode)
 
-    def testRecombinantFileWithNoRun(self):
-        """
-        Test that the recombinantFile method raises a RuntimeError if it
-        is called before any analysis is done.
-        """
-        error = '^No analysis has been run yet$'
-        assertRaisesRegex(self, RuntimeError, error, self.ra.recombinantFile)
-
     def testRecombinantFile(self):
         """
         Test that the recombinantFile method produces the expected string.
@@ -116,14 +132,6 @@ class TestAnalysis(TestCase):
         self.assertEqual(
             join(self.ra.tmpDir, _OUTPUT_PREFIX + '.3s.rec'),
             self.ra.recombinantFile())
-
-    def testRemoveOutputWithNoRun(self):
-        """
-        Test that the removeOutput method raises a RuntimeError if it
-        is called before any analysis is done.
-        """
-        error = '^No analysis has been run yet$'
-        assertRaisesRegex(self, RuntimeError, error, self.ra.removeOutput)
 
     @patch('shutil.rmtree')
     def testRemoveOutput(self, rmtreeMock):
@@ -479,3 +487,144 @@ class TestReadRecombinants(TestCase):
                 ((11, 13), (51, 63))
             ),
             recombinant2.breakpoints)
+
+
+class TestInformativeSites(TestCase):
+    """
+    Tests for the C{py3seq.informativeSites} method.
+    """
+    def testEmpty(self):
+        """
+        If empty reads are passed to informativeSites, an empty tuple must
+        be returned.
+        """
+        self.assertEqual(
+            tuple(),
+            informativeSites(Read('id', ''), Read('id', ''), Read('id', '')))
+
+    def testLengthOneNotInformativeParentsIdenticalChildDiffers(self):
+        """
+        If length-1 reads are passed to informativeSites, and the parents are
+        identical, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'A'),
+                                          Read('id', 'T')))
+
+    def testLengthOneNotInformativeAllIdentical(self):
+        """
+        If length-1 reads are passed to informativeSites, and all sequences are
+        identical, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'A'),
+                                          Read('id', 'A')))
+
+    def testLengthOneNotInformativeAllDifferent(self):
+        """
+        If length-1 reads are passed to informativeSites, and all sequences are
+        different, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'G'),
+                                          Read('id', 'C')))
+
+    def testLengthOneNotInformativeGapInFirstParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the first parent
+        sequence has a gap, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', '-'),
+                                          Read('id', 'A'),
+                                          Read('id', 'T')))
+
+    def testLengthOneNotInformativeGapInSecondParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the second parent
+        sequence has a gap, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', '-'),
+                                          Read('id', 'T')))
+
+    def testLengthOneNotInformativeGapInChild(self):
+        """
+        If length-1 reads are passed to informativeSites, and the child
+        sequence has a gap, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'T'),
+                                          Read('id', '-')))
+
+    def testLengthOneNotInformativeNInFirstParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the first parent
+        sequence has an N, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'N'),
+                                          Read('id', 'A'),
+                                          Read('id', 'T')))
+
+    def testLengthOneNotInformativeNInSecondParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the second parent
+        sequence has an N, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'N'),
+                                          Read('id', 'T')))
+
+    def testLengthOneNotInformativeNInChild(self):
+        """
+        If length-1 reads are passed to informativeSites, and the child
+        sequence has an N, an empty tuple must be returned.
+        """
+        self.assertEqual(tuple(),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'T'),
+                                          Read('id', 'N')))
+
+    def testLengthOneInformativeMatchFirstParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the child
+        matches only the first parent, the site must be considered informative.
+        """
+        self.assertEqual((0,),
+                         informativeSites(Read('id', 'A'),
+                                          Read('id', 'C'),
+                                          Read('id', 'A')))
+
+    def testLengthOneInformativeMatchSecondParent(self):
+        """
+        If length-1 reads are passed to informativeSites, and the child
+        matches only the second parent, the site must be considered
+        informative.
+        """
+        self.assertEqual((0,),
+                         informativeSites(Read('id', 'C'),
+                                          Read('id', 'A'),
+                                          Read('id', 'A')))
+
+    def testTwoInformativeOutOfThree(self):
+        """
+        If length-3 reads are passed to informativeSites, and the first
+        and last sites are informative, (0, 2) must be returned.
+        """
+        self.assertEqual((0, 2),
+                         informativeSites(Read('id', 'AGC'),
+                                          Read('id', 'CGA'),
+                                          Read('id', 'AGA')))
+
+
+class TestTriplet(TestCase):
+    """
+    Tests for the C{py3seq.triplet} method.
+    """

@@ -3,7 +3,9 @@ from tempfile import mkdtemp
 import shutil
 import six
 
+from dark.dna import compareDNAReads
 from dark.process import Executor
+from dark.reads import Reads
 
 _OUTPUT_PREFIX = 'output'
 
@@ -215,3 +217,143 @@ def readRecombinants(filename):
             yield Recombinant(
                 pId, qId, cId, m, n, k, p, hs, logp, dsP, minRecLength,
                 tuple(breakpointTuples))
+
+
+def informativeSites(p, q, child, alphabet=frozenset('ACGT')):
+    """
+    Examine a triplet of sequences and return their informative sites.
+
+    From the Boni, Posada, and Feldman paper (see ../README.md):
+
+        For our purposes, we define informative sites as those where
+        the child’s nucleotide matches exactly one of the parents’
+        nucleotides. Uninformative sites are sites where (i) all three
+        sequences agree, (ii) all three sequences differ, or (iii) the
+        parents have matching (i.e.  identical) nucleotides that differ
+        from the child’s. Our definition of informative sites is
+
+    @param p: The C{dark.reads.Read} first parent.
+    @param q: The C{dark.reads.Read} second parent.
+    @param child: The C{dark.reads.Read} child.
+    @return: A C{tuple} of informative sites (0-based) ordered from
+        lowest to highest.
+
+    """
+    sites = []
+    append = sites.append
+
+    for offset, (a, b, c) in enumerate(
+            zip(p.sequence, q.sequence, child.sequence)):
+        nts = set((a, b, c))
+        if not (nts - alphabet) and len(nts) == 2 and a != b:
+            append(offset)
+
+    return tuple(sites)
+
+
+def analyzeRegion(p, q, child, start, end, matchAmbiguous):
+    """
+    @param p: The C{dark.reads.Read} first parent.
+    @param q: The C{dark.reads.Read} second parent.
+    @param child: The C{dark.reads.Read} child.
+    @param start: The C{int} offset of the beginning of the region to
+        analyze.
+    @param end: The C{int} offset of the end of the region to
+        analyze. This a Python-style string offset (i.e., the base
+        at this offset in the sequences will not be included in the
+        analysis).
+    @param matchAmbiguous: If C{True}, count ambiguous nucleotides that are
+        possibly correct as actually being correct. Otherwise, we are strict
+        and insist that only non-ambiguous nucleotides can contribute to the
+        matching nucleotide count.
+    @return: A C{dict} containing information about the identity match
+        between the two regions (entirely and also just at the informative
+        sites in the region), as well as 'm' (the number of informative sites
+        at which the child matches p) and 'n' (the number of informative sites
+        at which the child matches q).
+    """
+    pRegion = p[start:end]
+    qRegion = q[start:end]
+    childRegion = child[start:end]
+    iSites = informativeSites(pRegion, qRegion, childRegion)
+
+    pRegionInformative, qRegionInformative, childRegionInformative = list(
+        Reads((pRegion, qRegion, childRegion)).filter(keepSites=iSites))
+
+    m = n = 0
+    for site, (pNt, qNt, childNt) in enumerate(
+            zip(pRegionInformative.sequence,
+                qRegionInformative.sequence,
+                childRegionInformative.sequence), start=1):
+        if childNt == pNt:
+            m += 1
+        elif childNt == qNt:
+            n += 1
+        else:
+            raise ValueError('Child nucleotide %s at site %d does not match '
+                             'either parent' % (childNt, site))
+
+    return {
+        'all': {
+            'p q': compareDNAReads(pRegion, qRegion, matchAmbiguous),
+            'p child': compareDNAReads(pRegion, childRegion, matchAmbiguous),
+            'q child': compareDNAReads(qRegion, childRegion, matchAmbiguous),
+        },
+        'informative': {
+            'p q': compareDNAReads(
+                pRegionInformative, qRegionInformative, matchAmbiguous),
+            'p child': compareDNAReads(
+                pRegionInformative, childRegionInformative, matchAmbiguous),
+            'q child': compareDNAReads(
+                qRegionInformative, childRegionInformative, matchAmbiguous),
+        },
+        'informativeSites': iSites,
+        'm': m,
+        'n': n,
+        'start': start,
+        'end': end,
+        'length': end - start,
+        'pRegion': pRegion,
+        'qRegion': qRegion,
+        'childRegion': childRegion,
+        'pRegionInformative': pRegionInformative,
+        'qRegionInformative': qRegionInformative,
+        'childRegionInformative': childRegionInformative,
+    }
+
+
+def triplet(p, q, child, breakpoints=None, matchAmbiguous=True):
+    """
+    Examine a triplet of sequences and return information on their
+    relationship as a possible parent/parent/child triplet.
+
+    @param p: A C{dark.reads.Reads} instance of the first parent.
+    @param q: A C{dark.reads.Reads} instance of the second parent.
+    @param child: A C{dark.reads.Reads} instance of the possibly
+        recombinant child.
+    @param breakpoints: An iterable of C{int} breakpoint offsets or C{None}
+        if no breakpoint analysis should be done.
+    @param matchAmbiguous: If C{True}, count ambiguous nucleotides that are
+        possibly correct as actually being correct. Otherwise, we are strict
+        and insist that only non-ambiguous nucleotides can contribute to the
+        matching nucleotide count.
+    @raise KeyError: If any of the three read ids are not present in
+        C{reads}.
+    @return: A C{dict}  ...
+    """
+
+    breakpointAnalysis = []
+    if breakpoints:
+        lastOffset = 0
+        for breakpoint in breakpoints:
+            breakpointAnalysis.append(
+                analyzeRegion(p, q, child, lastOffset, breakpoint,
+                              matchAmbiguous))
+            lastOffset = breakpoint
+
+    return {
+        'breakpointAnalysis': breakpointAnalysis,
+        'p': p,
+        'q': q,
+        'child': child,
+    }

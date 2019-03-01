@@ -1,3 +1,7 @@
+## 1.1.5 2019-03-01
+
+Added two utility scripts to the bin dir.
+
 ## 1.1.4 2018-12-29
 
 Allow passing a string value for `t` to the `run` method.
